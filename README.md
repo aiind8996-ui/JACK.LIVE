@@ -1,4 +1,4 @@
-#  💔 VINAY LOVE 😘 
+# VINAY SIR
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,6 +13,18 @@
         .error-message {
             color: red;
             margin-top: 10px;
+        }
+        /* 🔘 Black button style */
+        #videoButton {
+            background-color: black;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        #videoButton:hover {
+            background-color: #333;
         }
     </style>
 </head>
@@ -31,32 +43,40 @@
         </div>
     </form>
 
+    <!-- 🔘 Black button to open video -->
+    <div style="margin-top:20px;">
+        <button id="videoButton" onclick="openVideo()">▶ वीडियो देखें</button>
+    </div>
+
     <script>
+        // PDF upload validation
         document.getElementById('pdfUploadForm').addEventListener('submit', function(event) {
             const fileInput = document.getElementById('pdfFile');
             const fileError = document.getElementById('fileError');
             const file = fileInput.files[0];
 
-            fileError.textContent = ''; // Clear previous errors
+            fileError.textContent = '';
 
             if (!file) {
                 fileError.textContent = 'Please select a file to upload.';
-                event.preventDefault(); // Prevent form submission
+                event.preventDefault();
                 return;
             }
 
-            // Check if the file is a PDF
             if (file.type !== 'application/pdf') {
                 fileError.textContent = 'Only PDF documents are allowed.';
-                event.preventDefault(); // Prevent form submission
+                event.preventDefault();
                 return;
             }
-
-            // Note: Preventing image documents *within* a PDF is a server-side task.
-            // Client-side JavaScript cannot inspect the content of a PDF file.
-            // This client-side code only validates the file type as 'application/pdf'.
         });
+
+        // ✅ Video open function
+        function openVideo() {
+            // नीचे अपने वीडियो फाइल का सही नाम डालें (same folder में होना चाहिए)
+            window.open('babifreitas(360p).mp4', '_blank');
+        }
     </script>
 
 </body>
 </html>
+
