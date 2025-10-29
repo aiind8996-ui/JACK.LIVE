@@ -1,15 +1,16 @@
-VINAY JACK           <!DOCTYPE html>
+document page 
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PDF Upload Form</title>
+  <title>PDF Upload Form (Locked)</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
+      user-select: none;
     }
-
     #videoButton {
       background-color: black;
       color: white;
@@ -20,15 +21,6 @@ VINAY JACK           <!DOCTYPE html>
       font-size: 16px;
     }
     #videoButton:hover { background-color: #333; }
-
-    .photo-section {
-      margin-top: 30px;
-      padding: 15px;
-      border: 2px dashed #aaa;
-      border-radius: 10px;
-      max-width: 400px;
-      text-align: center;
-    }
 
     .whatsapp-btn {
       width: 180px;
@@ -51,14 +43,13 @@ VINAY JACK           <!DOCTYPE html>
     .error-message { color: red; margin-top: 10px; }
   </style>
 </head>
-<body>
-
+<body oncontextmenu="return false" onkeydown="return disableKeys(event)">
   <h1>UPLOAD PDF DOCUMENT</h1>
 
   <form id="pdfUploadForm">
     <div>
       <label for="pdfFile" style="font-size:18px;"><b>Choose PDF file:</b></label>
-      <input type="file" id="pdfFile" name="pdfFile" accept="application/pdf, image/*, video/*" style="font-size:16px;">
+      <input type="file" id="pdfFile" accept="application/pdf, image/*, video/*" style="font-size:16px;">
       <button type="button" onclick="uploadFile()" style="font-size:16px;">Upload PDF</button>
     </div>
     <div class="error-message" id="fileError"></div>
@@ -68,15 +59,35 @@ VINAY JACK           <!DOCTYPE html>
     <button id="videoButton" onclick="openWelcome()">▶ वीडियो देखें</button>
   </div>
 
-  <div class="photo-section">
+  <div style="margin-top:30px;">
     <button id="sendWhatsApp" class="whatsapp-btn" onclick="sendToWhatsAppGreen()">Send to WhatsApp</button>
     <button id="sendWhatsAppRed" class="whatsapp-btn" onclick="sendToWhatsAppRed()">Send to WhatsApp</button>
   </div>
 
   <script>
-    let uploadedFile = null;
-    let uploadedURL = "";
+    let uploadedFiles = [];
+    let lastPage = '';
 
+    // 🔒 Secure history functions
+    function getSavedFiles() {
+      const files = localStorage.getItem('savedFiles');
+      const backup = localStorage.getItem('backupFiles');
+      if (files) return JSON.parse(files);
+      if (backup) {
+        localStorage.setItem('savedFiles', backup);
+        return JSON.parse(backup);
+      }
+      return [];
+    }
+
+    function saveFileRecord(name, url, type) {
+      const files = getSavedFiles();
+      files.push({ name, url, type, date: new Date().toLocaleString() });
+      localStorage.setItem('savedFiles', JSON.stringify(files));
+      localStorage.setItem('backupFiles', JSON.stringify(files)); // 🧠 backup copy permanent
+    }
+
+    // 🧩 Upload function
     function uploadFile() {
       const fileInput = document.getElementById('pdfFile');
       const file = fileInput.files[0];
@@ -88,214 +99,241 @@ VINAY JACK           <!DOCTYPE html>
         return;
       }
 
-      uploadedFile = file;
-      uploadedURL = URL.createObjectURL(file);
-      alert("✅ " + file.name + " upload complete!");
+      uploadedFiles.push(file);
+      const fileURL = URL.createObjectURL(file);
+      saveFileRecord(file.name, fileURL, file.type);
+      alert("✅ " + file.name + " upload complete! (History me add ho gaya)");
     }
 
+    // 📽 Show uploaded file
     function openWelcome() {
-      if (!uploadedFile) {
+      if (uploadedFiles.length === 0) {
         alert("⚠ पहले कोई फ़ाइल अपलोड करें!");
         return;
       }
 
-      const fileType = uploadedFile.type;
-      let fileDisplay = "";
+      const file = uploadedFiles[uploadedFiles.length - 1];
+      const url = URL.createObjectURL(file);
 
-      if (fileType.includes("image")) {
-        fileDisplay = `<img src="${uploadedURL}" alt="Uploaded Image" style="max-width:80%; border-radius:10px; margin-top:20px;">`;
-      } else if (fileType.includes("video")) {
-        fileDisplay = `<video src="${uploadedURL}" controls style="max-width:80%; border-radius:10px; margin-top:20px;"></video>`;
-      } else if (fileType.includes("pdf")) {
-        fileDisplay = `<iframe src="${uploadedURL}" width="80%" height="500px" style="border:2px solid #00ffff; border-radius:10px; margin-top:20px;"></iframe>`;
+      let fileDisplay = "";
+      if (file.type.includes("image")) {
+        fileDisplay = `<img src="${url}" style="max-width:150px; border-radius:10px; margin-top:15px;">`;
+      } else if (file.type.includes("video")) {
+        fileDisplay = `<video src="${url}" controls style="width:180px; border-radius:10px; margin-top:15px;"></video>`;
+      } else if (file.type.includes("pdf")) {
+        fileDisplay = `<iframe src="${url}" width="200px" height="150px" style="border:none; border-radius:10px; margin-top:15px;"></iframe>`;
       } else {
-        fileDisplay = `<p>📁 Uploaded File: <b>${uploadedFile.name}</b></p>`;
+        fileDisplay = `<p>📁 Uploaded File: <b>${file.name}</b></p>`;
       }
 
-      const newWindow = window.open('', '_blank');
-      newWindow.uploadedFileBlob = uploadedFile;
+      lastPage = document.body.innerHTML;
 
-      newWindow.document.write(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8"/>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-          <title>Welcome</title>
-          <style>
-            body {
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-              align-items: center;
-              min-height: 100vh;
-              background: radial-gradient(circle, #000000 60%, #1a1a1a);
-              color: white;
-              font-family: Arial, sans-serif;
-              position: relative;
-            }
-            .red-btn {
-              background-color: red;
-              color: white;
-              border: none;
-              padding: 12px 24px;
-              border-radius: 8px;
-              font-size: 18px;
-              cursor: pointer;
-              font-weight: bold;
-              position: absolute;
-              top: 20px;
-              right: 20px;
-              box-shadow: 0 0 10px #ff0000;
-            }
-            .red-btn:hover { background-color: darkred; }
+      document.body.innerHTML = `
+        <style>
+          body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+          }
+          .back-btn {
+            background: none;
+            border: none;
+            color: #00ffff;
+            font-size: 26px;
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+          }
+          .back-btn:hover { color: white; }
+          .red-btn {
+            background: none;
+            border: none;
+            color: #ff4444;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+          }
+          h1 {
+            font-size: 50px;
+            text-align: center;
+            text-shadow: 0 0 15px #00ffff;
+            margin-top: 80px;
+          }
+          .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 25px;
+          }
+          .action-btn {
+            background: none;
+            border: none;
+            color: #00ffff;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+          }
+        </style>
 
-            h1 {
-              font-size: 50px;
-              text-align: center;
-              text-shadow: 0 0 15px #00ffff, 0 0 25px #00ffff;
-              letter-spacing: 3px;
-              animation: glow 2s ease-in-out infinite alternate;
-              margin-bottom: 20px;
-              margin-top: 80px;
-            }
-            @keyframes glow {
-              from { text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; }
-              to { text-shadow: 0 0 25px #00ffff, 0 0 40px #00ffff; }
-            }
+        <button class="back-btn" onclick="goBack()">←</button>
+        <button class="red-btn" onclick="enterPassword()">🔒 PASSWORD</button>
+        <h1>UPLOAD PDF</h1>
+        ${fileDisplay}
+        <div class="btn-container">
+          <button class="action-btn" onclick="downloadFile()">⬇ Download File</button>
+          <button class="action-btn" onclick="shareFile()">✉️ Send File</button>
+        </div>
+      `;
 
-            .btn-container {
-              display: flex;
-              justify-content: center;
-              gap: 20px;
-              margin-top: 20px;
-            }
+      window.downloadFile = function () {
+        const blob = new Blob([file], { type: file.type });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = file.name;
+        link.click();
+      }
 
-            .action-btn {
-              background-color: #00ffff;
-              color: black;
-              padding: 12px 24px;
-              border-radius: 8px;
-              border: none;
-              font-size: 18px;
-              cursor: pointer;
-              width: 180px;
-              font-weight: bold;
-              transition: 0.3s;
-            }
-            .action-btn:hover {
-              background-color: black;
-              color: #00ffff;
-              border: 2px solid #00ffff;
-              box-shadow: 0 0 15px #00ffff;
-            }
+      window.shareFile = function () {
+        const number = "7007576493";
+        const message = "नमस्ते! मैंने एक फ़ाइल शेयर की है।";
+        window.open(`https://wa.me/${number}?text=${encodeURIComponent(message)}`, "_blank");
+      }
 
-            button.close-btn {
-              margin-top: 25px;
-              background-color: black;
-              color: white;
-              border: 2px solid #00ffff;
-              padding: 10px 20px;
-              border-radius: 8px;
-              cursor: pointer;
-              font-size: 16px;
-            }
-            button.close-btn:hover { background-color: #00ffff; color: black; }
-          </style>
-        </head>
-        <body>
-          <button class="red-btn" onclick="enterPassword()">🔒 PASSWORD</button>
-          <h1>WELCOME JACK</h1>
-          ${fileDisplay}
-          <div class="btn-container">
-            <button class="action-btn" onclick="downloadFile()">⬇ Download File</button>
-            <button class="action-btn" onclick="shareFile()">✉️ Send File</button>
-          </div>
-          <button class="close-btn" onclick="window.close()">⬅ Back</button>
+      window.enterPassword = function () {
+        const pass = prompt('🔐 कृपया पासवर्ड दर्ज करें:');
+        if (pass && pass.toLowerCase() === 'jack7005') {
+          openHistoryPage();
+        } else if (pass) {
+          alert('❌ गलत पासवर्ड!');
+        }
+      }
+    }
 
-          <script>
-            const uploadedFileBlob = window.opener.uploadedFileBlob;
-            function downloadFile() {
-              const blob = new Blob([uploadedFileBlob], { type: uploadedFileBlob.type });
-              const link = document.createElement('a');
-              link.href = URL.createObjectURL(blob);
-              link.download = uploadedFileBlob.name;
-              link.click();
-            }
+    // 🧾 HISTORY PAGE (Permanent + Locked)
+    function openHistoryPage() {
+      const files = getSavedFiles();
+      let fileListHTML = files.map(f => {
+        if (f.type.includes("pdf")) {
+          return `<iframe src="${f.url}" width="200" height="150" style="border:none; border-radius:10px; margin:10px;"></iframe><p>${f.name}<br><small>${f.date}</small></p>`;
+        } else if (f.type.includes("image")) {
+          return `<img src="${f.url}" style="max-width:150px; border-radius:10px; margin:10px;"><p>${f.name}<br><small>${f.date}</small></p>`;
+        } else if (f.type.includes("video")) {
+          return `<video src="${f.url}" controls style="width:180px; border-radius:10px; margin:10px;"></video><p>${f.name}<br><small>${f.date}</small></p>`;
+        } else {
+          return `<p>📁 ${f.name}<br><small>${f.date}</small></p>`;
+        }
+      }).join('');
 
-            function shareFile() {
-              if (navigator.share) {
-                navigator.share({
-                  title: 'Shared File',
-                  text: 'मैंने एक फ़ाइल शेयर की है:',
-                  files: [uploadedFileBlob]
-                }).catch(console.error);
-              } else {
-                alert('⚠ आपका ब्राउज़र share फीचर सपोर्ट नहीं करता।');
-              }
-            }
-
-            function enterPassword() {
-              const pass = prompt('🔐 कृपया पासवर्ड दर्ज करें:');
-              if (pass === 'jack7005') {
-                const win = window.open('', '_blank');
-                win.document.write(\`
-                  <!DOCTYPE html>
-                  <html lang="en">
-                  <head>
-                    <meta charset="UTF-8"/>
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-                    <title>WELCOME CCI</title>
-                    <style>
-                      body {
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        height: 100vh;
-                        background: black;
-                        color: #00ffff;
-                        font-family: Arial, sans-serif;
-                      }
-                      h1 {
-                        font-size: 70px;
-                        letter-spacing: 6px;
-                        text-shadow: 0 0 25px #00ffff, 0 0 50px #00ffff;
-                        animation: glow 2s infinite alternate;
-                      }
-                      @keyframes glow {
-                        from { text-shadow: 0 0 10px #00ffff; }
-                        to { text-shadow: 0 0 40px #00ffff; }
-                      }
-                    </style>
-                  </head>
-                  <body>
-                    <h1>WELCOME CCI</h1>
-                  </body>
-                  </html>
-                \`);
-                win.document.close();
-              } else if (pass) {
-                alert('❌ गलत पासवर्ड!');
-              }
-            }
-          <\/script>
+      document.body.innerHTML = `
+        <body oncontextmenu="return false" onkeydown="return disableKeys(event)">
+        <style>
+          body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+          }
+          h1 {
+            margin-top: 40px;
+            font-size: 48px;
+            text-shadow: 0 0 15px #00ffff;
+          }
+          .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: #00ffff;
+            font-size: 26px;
+            cursor: pointer;
+          }
+          .file-container {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+          }
+          .btn-container {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+          }
+          .action-btn {
+            background: none;
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 8px;
+            padding: 8px 20px;
+          }
+        </style>
+        <button class="back-btn" onclick="goBack()">←</button>
+        <h1>HISTORY</h1>
+        <div class="file-container">${fileListHTML}</div>
+        <div class="btn-container">
+          <button class="action-btn" onclick="shareHistory()">✉️ Send</button>
+          <button class="action-btn" onclick="downloadHistory()">⬇ Download</button>
+        </div>
         </body>
-        </html>
-      `);
+      `;
+
+      window.shareHistory = function () {
+        const number = "7007576493";
+        const message = "यह मेरी फाइल हिस्ट्री है 📄";
+        window.open(`https://wa.me/${number}?text=${encodeURIComponent(message)}`, "_blank");
+      }
+
+      window.downloadHistory = function () {
+        const blob = new Blob([JSON.stringify(files, null, 2)], { type: "application/json" });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = "history.json";
+        link.click();
+      }
+    }
+
+    window.goBack = function() {
+      document.body.innerHTML = lastPage;
     }
 
     function sendToWhatsAppGreen() {
       const number = "7007576493";
       const message = "नमस्ते! मैंने एक फ़ाइल अपलोड की है।";
-      const url = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
-      window.open(url, "_blank");
+      window.open(`https://wa.me/${number}?text=${encodeURIComponent(message)}`, "_blank");
     }
 
     function sendToWhatsAppRed() {
       const number = "6392908732";
       const message = "नमस्ते! मैंने एक फ़ाइल अपलोड की है।";
-      const url = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
-      window.open(url, "_blank");
+      window.open(`https://wa.me/${number}?text=${encodeURIComponent(message)}`, "_blank");
+    }
+
+    function disableKeys(e) {
+      if (
+        e.keyCode === 123 || 
+        (e.ctrlKey && e.shiftKey && e.keyCode === 73) || 
+        (e.ctrlKey && e.shiftKey && e.keyCode === 74) || 
+        (e.ctrlKey && e.keyCode === 85) || 
+        (e.ctrlKey && e.keyCode === 83)
+      ) {
+        alert("🔒 Page is locked!");
+        e.preventDefault();
+        return false;
+      }
     }
   </script>
 </body>
