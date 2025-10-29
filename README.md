@@ -63,7 +63,7 @@ documents page
   </form>
 
   <div style="margin-top:20px;">
-    <button id="videoButton" onclick="openWelcome()">▶ वीडियो देखें</button>
+    <button id="videoButton" onclick="openWelcome()">▶ pdf देखें</button>
   </div>
 
   <!-- ✅ Green and Red buttons side by side -->
