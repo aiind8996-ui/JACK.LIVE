@@ -1,4 +1,4 @@
-documents page
+ # document upload 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,14 +22,6 @@ documents page
     }
     #videoButton:hover { background-color: #333; }
 
-    .whatsapp-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 15px;
-      margin-top: 30px;
-    }
-
     .whatsapp-btn {
       width: 180px;
       height: 45px;
@@ -38,6 +30,7 @@ documents page
       border-radius: 8px;
       cursor: pointer;
       font-size: 16px;
+      margin: 5px;
       transition: 0.3s;
     }
 
@@ -46,6 +39,22 @@ documents page
 
     #sendWhatsAppRed { background-color: #ff0000; }
     #sendWhatsAppRed:hover { background-color: #cc0000; }
+
+    /* 🎥 YouTube button style */
+    #youtubeButton {
+      background-color: #ff0000;
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+      transition: 0.3s;
+    }
+    #youtubeButton:hover {
+      background-color: #cc0000;
+    }
 
     .error-message { color: red; margin-top: 10px; }
   </style>
@@ -63,11 +72,10 @@ documents page
   </form>
 
   <div style="margin-top:20px;">
-    <button id="videoButton" onclick="openWelcome()">▶ pdf देखें</button>
+    <button id="videoButton" onclick="openWelcome()">▶ वीडियो देखें</button>
   </div>
 
-  <!-- ✅ Green and Red buttons side by side -->
-  <div class="whatsapp-container">
+  <div style="margin-top:30px;">
     <button id="sendWhatsApp" class="whatsapp-btn" onclick="sendToWhatsAppGreen()">Send to WhatsApp</button>
     <button id="sendWhatsAppRed" class="whatsapp-btn" onclick="sendToWhatsAppRed()">Send to WhatsApp</button>
   </div>
@@ -187,6 +195,17 @@ documents page
             cursor: pointer;
             font-weight: bold;
           }
+          #youtubeButton {
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 25px;
+          }
+          #youtubeButton:hover { background-color: #cc0000; }
         </style>
 
         <button class="back-btn" onclick="goBack()">←</button>
@@ -197,6 +216,9 @@ documents page
           <button class="action-btn" onclick="downloadFile()">⬇ Download File</button>
           <button class="action-btn" onclick="shareFile()">✉️ Send File</button>
         </div>
+
+        <!-- 🎥 YouTube Button -->
+        <button id="youtubeButton" onclick="openYouTube()">▶ Open YouTube</button>
       `;
 
       window.downloadFile = function () {
@@ -211,6 +233,10 @@ documents page
         const number = "7007576493";
         const message = "नमस्ते! मैंने एक फ़ाइल शेयर की है।";
         window.open(`https://wa.me/${number}?text=${encodeURIComponent(message)}`, "_blank");
+      }
+
+      window.openYouTube = function () {
+        window.open("https://www.youtube.com/", "_blank");
       }
 
       window.enterPassword = function () {
