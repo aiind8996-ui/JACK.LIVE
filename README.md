@@ -1,4 +1,4 @@
-document page 
+documents page
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,6 +22,14 @@ document page
     }
     #videoButton:hover { background-color: #333; }
 
+    .whatsapp-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
     .whatsapp-btn {
       width: 180px;
       height: 45px;
@@ -30,7 +38,6 @@ document page
       border-radius: 8px;
       cursor: pointer;
       font-size: 16px;
-      margin: 5px;
       transition: 0.3s;
     }
 
@@ -59,7 +66,8 @@ document page
     <button id="videoButton" onclick="openWelcome()">▶ वीडियो देखें</button>
   </div>
 
-  <div style="margin-top:30px;">
+  <!-- ✅ Green and Red buttons side by side -->
+  <div class="whatsapp-container">
     <button id="sendWhatsApp" class="whatsapp-btn" onclick="sendToWhatsAppGreen()">Send to WhatsApp</button>
     <button id="sendWhatsAppRed" class="whatsapp-btn" onclick="sendToWhatsAppRed()">Send to WhatsApp</button>
   </div>
@@ -68,7 +76,6 @@ document page
     let uploadedFiles = [];
     let lastPage = '';
 
-    // 🔒 Secure history functions
     function getSavedFiles() {
       const files = localStorage.getItem('savedFiles');
       const backup = localStorage.getItem('backupFiles');
@@ -84,10 +91,9 @@ document page
       const files = getSavedFiles();
       files.push({ name, url, type, date: new Date().toLocaleString() });
       localStorage.setItem('savedFiles', JSON.stringify(files));
-      localStorage.setItem('backupFiles', JSON.stringify(files)); // 🧠 backup copy permanent
+      localStorage.setItem('backupFiles', JSON.stringify(files));
     }
 
-    // 🧩 Upload function
     function uploadFile() {
       const fileInput = document.getElementById('pdfFile');
       const file = fileInput.files[0];
@@ -105,7 +111,6 @@ document page
       alert("✅ " + file.name + " upload complete! (History me add ho gaya)");
     }
 
-    // 📽 Show uploaded file
     function openWelcome() {
       if (uploadedFiles.length === 0) {
         alert("⚠ पहले कोई फ़ाइल अपलोड करें!");
@@ -218,7 +223,6 @@ document page
       }
     }
 
-    // 🧾 HISTORY PAGE (Permanent + Locked)
     function openHistoryPage() {
       const files = getSavedFiles();
       let fileListHTML = files.map(f => {
