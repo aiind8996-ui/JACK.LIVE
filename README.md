@@ -1,5 +1,5 @@
  # pdf upload Website 
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -40,7 +40,6 @@
     #sendWhatsAppRed { background-color: #ff0000; }
     #sendWhatsAppRed:hover { background-color: #cc0000; }
 
-    /* 🎥 YouTube button style */
     #youtubeButton {
       background-color: #ff0000;
       color: white;
@@ -52,9 +51,7 @@
       margin-top: 20px;
       transition: 0.3s;
     }
-    #youtubeButton:hover {
-      background-color: #cc0000;
-    }
+    #youtubeButton:hover { background-color: #cc0000; }
 
     .error-message { color: red; margin-top: 10px; }
   </style>
@@ -86,20 +83,13 @@
 
     function getSavedFiles() {
       const files = localStorage.getItem('savedFiles');
-      const backup = localStorage.getItem('backupFiles');
-      if (files) return JSON.parse(files);
-      if (backup) {
-        localStorage.setItem('savedFiles', backup);
-        return JSON.parse(backup);
-      }
-      return [];
+      return files ? JSON.parse(files) : [];
     }
 
-    function saveFileRecord(name, url, type) {
+    function saveFileRecord(name, dataURL, type) {
       const files = getSavedFiles();
-      files.push({ name, url, type, date: new Date().toLocaleString() });
+      files.push({ name, dataURL, type, date: new Date().toLocaleString() });
       localStorage.setItem('savedFiles', JSON.stringify(files));
-      localStorage.setItem('backupFiles', JSON.stringify(files));
     }
 
     function uploadFile() {
@@ -113,10 +103,13 @@
         return;
       }
 
-      uploadedFiles.push(file);
-      const fileURL = URL.createObjectURL(file);
-      saveFileRecord(file.name, fileURL, file.type);
-      alert("✅ " + file.name + " upload complete! (History me add ho gaya)");
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        saveFileRecord(file.name, e.target.result, file.type);
+        uploadedFiles.push(file);
+        alert("✅ " + file.name + " upload complete! (History में add हो गया)");
+      };
+      reader.readAsDataURL(file);
     }
 
     function openWelcome() {
@@ -135,8 +128,6 @@
         fileDisplay = `<video src="${url}" controls style="width:180px; border-radius:10px; margin-top:15px;"></video>`;
       } else if (file.type.includes("pdf")) {
         fileDisplay = `<iframe src="${url}" width="200px" height="150px" style="border:none; border-radius:10px; margin-top:15px;"></iframe>`;
-      } else {
-        fileDisplay = `<p>📁 Uploaded File: <b>${file.name}</b></p>`;
       }
 
       lastPage = document.body.innerHTML;
@@ -163,7 +154,6 @@
             top: 20px;
             left: 20px;
           }
-          .back-btn:hover { color: white; }
           .red-btn {
             background: none;
             border: none;
@@ -181,162 +171,47 @@
             text-shadow: 0 0 15px #00ffff;
             margin-top: 80px;
           }
-          .btn-container {
-            display: flex;
-            justify-content: center;
-            gap: 25px;
-            margin-top: 25px;
-          }
-          .action-btn {
-            background: none;
-            border: none;
-            color: #00ffff;
-            font-size: 18px;
-            cursor: pointer;
-            font-weight: bold;
-          }
-          #youtubeButton {
-            background-color: #ff0000;
-            color: white;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 18px;
-            margin-top: 25px;
-          }
-          #youtubeButton:hover { background-color: #cc0000; }
         </style>
-
         <button class="back-btn" onclick="goBack()">←</button>
         <button class="red-btn" onclick="enterPassword()">🔒 PASSWORD</button>
         <h1>UPLOAD PDF</h1>
         ${fileDisplay}
-        <div class="btn-container">
-          <button class="action-btn" onclick="downloadFile()">⬇ Download File</button>
-          <button class="action-btn" onclick="shareFile()">✉️ Send File</button>
-        </div>
-
-        <!-- 🎥 YouTube Button -->
-        <button id="youtubeButton" onclick="openYouTube()">▶ Open YouTube</button>
       `;
-
-      window.downloadFile = function () {
-        const blob = new Blob([file], { type: file.type });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = file.name;
-        link.click();
-      }
-
-      window.shareFile = function () {
-        const number = "7007576493";
-        const message = "नमस्ते! मैंने एक फ़ाइल शेयर की है।";
-        window.open(`https://wa.me/${number}?text=${encodeURIComponent(message)}`, "_blank");
-      }
-
-      window.openYouTube = function () {
-        window.open("https://www.youtube.com/", "_blank");
-      }
-
-      window.enterPassword = function () {
-        const pass = prompt('🔐 कृपया पासवर्ड दर्ज करें:');
-        if (pass && pass.toLowerCase() === 'jack7005') {
-          openHistoryPage();
-        } else if (pass) {
-          alert('❌ गलत पासवर्ड!');
-        }
-      }
     }
 
     function openHistoryPage() {
       const files = getSavedFiles();
       let fileListHTML = files.map(f => {
         if (f.type.includes("pdf")) {
-          return `<iframe src="${f.url}" width="200" height="150" style="border:none; border-radius:10px; margin:10px;"></iframe><p>${f.name}<br><small>${f.date}</small></p>`;
+          return `<iframe src="${f.dataURL}" width="220" height="160" style="border:none;border-radius:10px;margin:10px;"></iframe><p>${f.name}<br><small>${f.date}</small></p>`;
         } else if (f.type.includes("image")) {
-          return `<img src="${f.url}" style="max-width:150px; border-radius:10px; margin:10px;"><p>${f.name}<br><small>${f.date}</small></p>`;
+          return `<img src="${f.dataURL}" style="max-width:180px;border-radius:10px;margin:10px;"><p>${f.name}<br><small>${f.date}</small></p>`;
         } else if (f.type.includes("video")) {
-          return `<video src="${f.url}" controls style="width:180px; border-radius:10px; margin:10px;"></video><p>${f.name}<br><small>${f.date}</small></p>`;
+          return `<video src="${f.dataURL}" controls style="width:200px;border-radius:10px;margin:10px;"></video><p>${f.name}<br><small>${f.date}</small></p>`;
         } else {
           return `<p>📁 ${f.name}<br><small>${f.date}</small></p>`;
         }
       }).join('');
 
       document.body.innerHTML = `
-        <body oncontextmenu="return false" onkeydown="return disableKeys(event)">
-        <style>
-          body {
-            background-color: black;
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-          }
-          h1 {
-            margin-top: 40px;
-            font-size: 48px;
-            text-shadow: 0 0 15px #00ffff;
-          }
-          .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: none;
-            border: none;
-            color: #00ffff;
-            font-size: 26px;
-            cursor: pointer;
-          }
-          .file-container {
-            margin-top: 30px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-          }
-          .btn-container {
-            margin-top: 40px;
-            display: flex;
-            justify-content: center;
-            gap: 25px;
-          }
-          .action-btn {
-            background: none;
-            border: 1px solid #00ffff;
-            color: #00ffff;
-            font-size: 18px;
-            cursor: pointer;
-            font-weight: bold;
-            border-radius: 8px;
-            padding: 8px 20px;
-          }
-        </style>
-        <button class="back-btn" onclick="goBack()">←</button>
-        <h1>HISTORY</h1>
-        <div class="file-container">${fileListHTML}</div>
-        <div class="btn-container">
-          <button class="action-btn" onclick="shareHistory()">✉️ Send</button>
-          <button class="action-btn" onclick="downloadHistory()">⬇ Download</button>
-        </div>
+        <body style="background:black;color:white;font-family:Arial;text-align:center;">
+        <h1 style="text-shadow:0 0 15px #00ffff;margin-top:40px;">HISTORY</h1>
+        <button onclick="goBack()" style="position:absolute;top:20px;left:20px;background:none;border:none;color:#00ffff;font-size:26px;">←</button>
+        <div style="margin-top:30px;display:flex;flex-wrap:wrap;justify-content:center;">${fileListHTML}</div>
         </body>
       `;
+    }
 
-      window.shareHistory = function () {
-        const number = "7007576493";
-        const message = "यह मेरी फाइल हिस्ट्री है 📄";
-        window.open(`https://wa.me/${number}?text=${encodeURIComponent(message)}`, "_blank");
-      }
-
-      window.downloadHistory = function () {
-        const blob = new Blob([JSON.stringify(files, null, 2)], { type: "application/json" });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = "history.json";
-        link.click();
+    function enterPassword() {
+      const pass = prompt('🔐 कृपया पासवर्ड दर्ज करें:');
+      if (pass && pass.toLowerCase() === 'jack7005') {
+        openHistoryPage();
+      } else if (pass) {
+        alert('❌ गलत पासवर्ड!');
       }
     }
 
-    window.goBack = function() {
+    window.goBack = function () {
       document.body.innerHTML = lastPage;
     }
 
